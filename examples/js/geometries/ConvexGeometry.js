@@ -1,6 +1,4 @@
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
+console.warn( "THREE.ConvexGeometry: As part of the transition to ES6 Modules, the files in 'examples/js' were deprecated in May 2020 (r117) and will be deleted in December 2020 (r124). You can find more information about developing using ES6 Modules in https://threejs.org/docs/#manual/en/introduction/Installation." );
 
 // ConvexGeometry
 
@@ -61,8 +59,8 @@ THREE.ConvexBufferGeometry = function ( points ) {
 
 	// build geometry
 
-	this.addAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-	this.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+	this.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+	this.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
 
 };
 

@@ -1,6 +1,11 @@
+import {
+	ShaderLib,
+	ShaderMaterial,
+	UniformsLib,
+	UniformsUtils,
+	Vector2
+} from "../../../build/three.module.js";
 /**
- * @author WestLangley / http://github.com/WestLangley
- *
  * parameters = {
  *  color: <hex>,
  *  linewidth: <float>,
@@ -12,21 +17,14 @@
  * }
  */
 
-import {
-	ShaderLib,
-	ShaderMaterial,
-	UniformsLib,
-	UniformsUtils,
-	Vector2
-} from "../../../build/three.module.js";
-
 UniformsLib.line = {
 
 	linewidth: { value: 1 },
 	resolution: { value: new Vector2( 1, 1 ) },
 	dashScale: { value: 1 },
 	dashSize: { value: 1 },
-	gapSize: { value: 1 } // todo FIX - maybe change to totalSize
+	gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
+	opacity: { value: 1 }
 
 };
 
@@ -236,10 +234,10 @@ ShaderLib[ 'line' ] = {
 
 			gl_FragColor = vec4( diffuseColor.rgb, diffuseColor.a );
 
-			#include <premultiplied_alpha_fragment>
 			#include <tonemapping_fragment>
 			#include <encodings_fragment>
 			#include <fog_fragment>
+			#include <premultiplied_alpha_fragment>
 
 		}
 		`
@@ -254,7 +252,9 @@ var LineMaterial = function ( parameters ) {
 		uniforms: UniformsUtils.clone( ShaderLib[ 'line' ].uniforms ),
 
 		vertexShader: ShaderLib[ 'line' ].vertexShader,
-		fragmentShader: ShaderLib[ 'line' ].fragmentShader
+		fragmentShader: ShaderLib[ 'line' ].fragmentShader,
+
+		clipping: true // required for clipping support
 
 	} );
 
@@ -352,6 +352,24 @@ var LineMaterial = function ( parameters ) {
 
 		},
 
+		opacity: {
+
+			enumerable: true,
+
+			get: function () {
+
+				return this.uniforms.opacity.value;
+
+			},
+
+			set: function ( value ) {
+
+				this.uniforms.opacity.value = value;
+
+			}
+
+		},
+
 		resolution: {
 
 			enumerable: true,
@@ -380,22 +398,5 @@ LineMaterial.prototype = Object.create( ShaderMaterial.prototype );
 LineMaterial.prototype.constructor = LineMaterial;
 
 LineMaterial.prototype.isLineMaterial = true;
-
-LineMaterial.prototype.copy = function ( source ) {
-
-	ShaderMaterial.prototype.copy.call( this, source );
-
-	this.color.copy( source.color );
-
-	this.linewidth = source.linewidth;
-
-	this.resolution = source.resolution;
-
-	// todo
-
-	return this;
-
-};
-
 
 export { LineMaterial };

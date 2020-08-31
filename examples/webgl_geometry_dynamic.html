@@ -9,15 +9,12 @@
 			body {
 				color: #666;
 			}
-			a {
-				color: #08f;
-			}
 		</style>
 	</head>
 	<body>
 
 		<div id="info">
-			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - dynamic geometry<br />
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - dynamic geometry<br />
 			left click: forward, right click: backward
 		</div>
 
@@ -45,11 +42,6 @@
 
 				clock = new THREE.Clock();
 
-				controls = new FirstPersonControls( camera );
-
-				controls.movementSpeed = 500;
-				controls.lookSpeed = 0.1;
-
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xaaccff );
 				scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
@@ -58,7 +50,7 @@
 				geometry.rotateX( - Math.PI / 2 );
 
 				var position = geometry.attributes.position;
-				position.dynamic = true;
+				position.usage = THREE.DynamicDrawUsage;
 
 				for ( var i = 0; i < position.count; i ++ ) {
 
@@ -80,6 +72,11 @@
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
+
+				controls = new FirstPersonControls( camera, renderer.domElement );
+
+				controls.movementSpeed = 500;
+				controls.lookSpeed = 0.1;
 
 				stats = new Stats();
 				document.body.appendChild( stats.dom );

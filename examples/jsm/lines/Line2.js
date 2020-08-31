@@ -1,8 +1,3 @@
-/**
- * @author WestLangley / http://github.com/WestLangley
- *
- */
-
 
 import { LineSegments2 } from "../lines/LineSegments2.js";
 import { LineGeometry } from "../lines/LineGeometry.js";
@@ -23,15 +18,7 @@ Line2.prototype = Object.assign( Object.create( LineSegments2.prototype ), {
 
 	constructor: Line2,
 
-	isLine2: true,
-
-	copy: function ( /* source */ ) {
-
-		// todo
-
-		return this;
-
-	}
+	isLine2: true
 
 } );
 
