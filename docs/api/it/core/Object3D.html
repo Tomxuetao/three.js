@@ -79,7 +79,7 @@
 		<h3>[property:Boolean matrixAutoUpdate]</h3>
 		<p>
       Quando viene settato calcola la matrice di posizione, (rotazione o quaternione) e 
-      ridimensiona ogni fotogramma ed inoltre ricalcola la  proprietà matrixWorld. L'impostazione predefinita è [page:Object3D.DefaultMatrixAutoUpdate] (true).
+      ridimensiona ogni fotogramma ed inoltre ricalcola la  proprietà matrixWorld. L'impostazione predefinita è [page:Object3D.DEFAULT_MATRIX_AUTO_UPDATE] (true).
 		</p>
 
 		<h3>[property:Matrix4 matrixWorld]</h3>
@@ -89,9 +89,9 @@
 
 		<h3>[property:Boolean matrixWorldAutoUpdate]</h3>
 		<p>
-      Il valore predefinito è true. Se impostato, il renderer controlla ogni frame se l'oggetto e i suo figli 
-      necessitano di aggiornare la matrice.
+      Se impostato, il renderer controlla ogni frame se l'oggetto e i suo figli necessitano di aggiornare la matrice.
       Quando non lo è, devi mantenere tu stesso tutte le matrici nell'oggetto e i suoi figli.
+	  Default is [page:Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE] (true).
 		</p>
 
 		<h3>[property:Boolean matrixWorldNeedsUpdate]</h3>
@@ -128,6 +128,17 @@
       Invece, le istanze di [page:Object3D], [page:Group] o [page:Bone] non sono renderizzabili e quindi questa callback non viene eseguita su questi oggetti.
 		</p>
 
+		<h3>[property:Function onAfterShadow]</h3>
+		<p>
+			An optional callback that is executed immediately after a 3D object is rendered to a shadow map. 
+			Questa funzione è chiamata con i seguenti parametri: renderer, scene, camera, shadowCamera, geometry, depthMaterial, group.
+		</p>
+		<p>
+			Si noti che questa funzione di callback viene eseguita per oggi 3D `renderizzabili` (renderable). Ovvero oggetti 3D che definiscono
+			il loro aspetto visivo con geometrie e materiali come istanze di [page:Mesh], [page:Line], [page:Points] o [page:Sprite].
+			Invece, le istanze di [page:Object3D], [page:Group] o [page:Bone] non sono renderizzabili e quindi questa callback non viene eseguita su questi oggetti.
+		</p>
+
 		<h3>[property:Function onBeforeRender]</h3>
 		<p>
       Una callback opzionale che viene eseguita immediatamente prima che un oggetto 3D è stato renderizzato.
@@ -137,6 +148,17 @@
       Si noti che questa funzione di callback viene eseguita per oggi 3D `renderizzabili` (renderable). Ovvero oggetti 3D che definiscono
       il loro aspetto visivo con geometrie e materiali come istanze di [page:Mesh], [page:Line], [page:Points] o [page:Sprite].
       Invece, le istanze di [page:Object3D], [page:Group] o [page:Bone] non sono renderizzabili e quindi questa callback non viene eseguita su questi oggetti.
+		</p>
+
+		<h3>[property:Function onBeforeShadow]</h3>
+		<p>
+			An optional callback that is executed immediately before a 3D object is rendered to a shadow map. 
+			Questa funzione è chiamata con i seguenti parametri: renderer, scene, camera, shadowCamera, geometry, depthMaterial, group.
+		</p>
+		<p>
+			Si noti che questa funzione di callback viene eseguita per oggi 3D `renderizzabili` (renderable). Ovvero oggetti 3D che definiscono
+			il loro aspetto visivo con geometrie e materiali come istanze di [page:Mesh], [page:Line], [page:Points] o [page:Sprite].
+			Invece, le istanze di [page:Object3D], [page:Group] o [page:Bone] non sono renderizzabili e quindi questa callback non viene eseguita su questi oggetti.
 		</p>
 
 		<h3>[property:Object3D parent]</h3>
@@ -173,7 +195,7 @@
 		<h3>[property:Vector3 up]</h3>
 		<p>
       Questa proprietà viene utilizzata dal metodo [page:.lookAt lookAt], per esempio, per determinare l'orientamento del risultato.<br />
-      L'impostazione predefinita è [page:Object3D.DefaultUp] - che è, `( 0, 1, 0 )`.
+      L'impostazione predefinita è [page:Object3D.DEFAULT_UP] - che è, `( 0, 1, 0 )`.
 		</p>
 
 		<h3>[property:Object userData]</h3>
@@ -197,24 +219,28 @@
 		<h2>Proprietà Statiche</h2>
 		<p>
       Le proprietà statiche e i metodi sono definiti per classe piuttosto che per istanza della classe.
-      Questo significa che modificando [page:Object3D.DefaultUp] o [page:Object3D.DefaultMatrixAutoUpdate]
+      Questo significa che modificando [page:Object3D.DEFAULT_UP] o [page:Object3D.DEFAULT_MATRIX_AUTO_UPDATE]
       verranno modificati i valori di [page:.up up] e [page:.matrixAutoUpdate matrixAutoUpdate] per `ogni`
       istanza di Object3D (o classi derivate) creata dopo che la modifica è stata fatta 
       (gli Object3D già creati non saranno interessati).
 		</p>
 
-		<h3>[property:Vector3 DefaultUp]</h3>
+		<h3>[property:Vector3 DEFAULT_UP]</h3>
 		<p>
       La direzione predefinita di [page:.up up] per gli oggetti, utilizzata anche come posizione predefinita per [page:DirectionalLight],
 			[page:HemisphereLight] e [page:Spotlight] (che crea luci che brillano dall'alto verso il basso).<br />
       Impostare su ( 0, 1, 0 ) per impostazione predefinita.
 		</p>
 
-		<h3>[property:Boolean DefaultMatrixAutoUpdate]</h3>
+		<h3>[property:Boolean DEFAULT_MATRIX_AUTO_UPDATE]</h3>
 		<p>
       L'impostazione predefinita per [page:.matrixAutoUpdate matrixAutoUpdate] per Object3D appena creati.<br />
 		</p>
 
+		<h3>[property:Boolean DEFAULT_MATRIX_WORLD_AUTO_UPDATE]</h3>
+		<p>
+			L'impostazione predefinita per[page:.matrixWorldAutoUpdate matrixWorldAutoUpdate] per Object3D appena creati.<br />
+		</p>
 
 		<h2>Metodi</h2>
 
@@ -281,6 +307,17 @@
       Cerca in un oggetto e nei suoi figli, partendo dall'oggetto stesso, e restituisce il primo con la proprietà che corrisponde al valore passato.
 		</p>
 
+		<h3>[method:Object3D getObjectsByProperty]( [param:String name], [param:Any value], [param:Array optionalTarget] )</h3>
+		<p>
+		  name -- il nome della proprietà da cercare. <br />
+		  value -- il valore della proprietà data. <br />
+		  optionalTarget -- (opzionale) array dove impostare il risultato.
+		  Altrimenti viene istanziato un nuovo Array. 
+		  Se impostato, è necessario cancellare questo array prima di ogni chiamata (ad esempio, array.length = 0;). <br /><br />
+
+      Cerca in un oggetto e nei suoi figli, partendo dall'oggetto stesso, e restituisce tutti gli oggetti con la proprietà che corrisponde al valore passato.
+		</p>
+
 		<h3>[method:Vector3 getWorldPosition]( [param:Vector3 target] )</h3>
 		<p>
 		  [page:Vector3 target] — il risultato verrà copiato in questo Vector3. <br /><br />
@@ -328,7 +365,7 @@
       Questo metodo non supporta oggetti con genitore/i con scalabilità non uniforme.
 		</p>
 
-		<h3>[method:Array raycast]( [param:Raycaster raycaster], [param:Array intersects] )</h3>
+		<h3>[method:undefined raycast]( [param:Raycaster raycaster], [param:Array intersects] )</h3>
 		<p>
       Metodo astratto (vuoto) per ottenere le intersezioni tra un raggio casted e questo oggetto.
       Sottoclassi come [page:Mesh], [page:Line], e [page:Points] implementano questo metodo per 

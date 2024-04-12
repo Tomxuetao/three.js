@@ -16,6 +16,17 @@
 			The last pass is automatically rendered to screen.
 		</p>
 
+		<h2>Import</h2>
+
+		<p>
+			[name] is an add-on, and must be imported explicitly.
+			See [link:#manual/introduction/Installation Installation / Addons].
+		</p>
+
+		<code>
+			import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+		</code>
+
 		<h2>Examples</h2>
 
 		<p>
@@ -28,7 +39,9 @@
 			[example:webgl_postprocessing_fxaa postprocessing fxaa]<br />
 			[example:webgl_postprocessing_glitch postprocessing glitch]<br />
 			[example:webgl_postprocessing_godrays postprocessing godrays]<br />
+			[example:webgl_postprocessing_gtao postprocessing gtao]<br />
 			[example:webgl_postprocessing_masking postprocessing masking]<br />
+			[example:webgl_postprocessing_material_ao postprocessing material ao]<br />
 			[example:webgl_postprocessing_outline postprocessing outline]<br />
 			[example:webgl_postprocessing_pixel postprocessing pixelate]<br />
 			[example:webgl_postprocessing_procedural postprocessing procedural]<br />
@@ -87,6 +100,11 @@
 			pass -- The pass to add to the pass chain.<br /><br />
 
 			Adds the given pass to the pass chain.
+		</p>
+
+		<h3>[method:undefined dispose]()</h3>
+		<p>
+			Frees the GPU-related resources allocated by this instance. Call this method whenever this instance is no longer used in your app.
 		</p>
 
 		<h3>[method:undefined insertPass]( [param:Pass pass], [param:Integer index] )</h3>

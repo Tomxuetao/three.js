@@ -1,19 +1,17 @@
 import LightingNode from './LightingNode.js';
-import ContextNode from '../core/ContextNode.js';
-import MaxMipLevelNode from '../utils/MaxMipLevelNode.js';
-import { ShaderNode, float, add, mul, div, log2, clamp, roughness, reflect, mix, positionViewDirection, negate, normalize, transformedNormalView, transformedNormalWorld, transformDirection, cameraViewMatrix } from '../shadernode/ShaderNodeElements.js';
+import { cache } from '../core/CacheNode.js';
+import { context } from '../core/ContextNode.js';
+import { roughness, clearcoatRoughness } from '../core/PropertyNode.js';
+import { cameraViewMatrix } from '../accessors/CameraNode.js';
+import { transformedClearcoatNormalView, transformedNormalView, transformedNormalWorld } from '../accessors/NormalNode.js';
+import { positionViewDirection } from '../accessors/PositionNode.js';
+import { addNodeClass } from '../core/Node.js';
+import { float } from '../shadernode/ShaderNode.js';
+import { reference } from '../accessors/ReferenceNode.js';
+import { transformedBentNormalView } from '../accessors/AccessorsUtils.js';
+import { pmremTexture } from '../pmrem/PMREMNode.js';
 
-// taken from here: http://casual-effects.blogspot.ca/2011/08/plausible-environment-lighting-in-two.html
-const getSpecularMIPLevel = new ShaderNode( ( { texture, levelNode } ) => {
-
-	const maxMIPLevelScalar = new MaxMipLevelNode( texture );
-
-	const sigma = div( mul( Math.PI, mul( levelNode, levelNode ) ), add( 1.0, levelNode ) );
-	const desiredMIPLevel = add( maxMIPLevelScalar, log2( sigma ) );
-
-	return clamp( desiredMIPLevel, 0.0, maxMIPLevelScalar );
-
-} );
+const envNodeCache = new WeakMap();
 
 class EnvironmentNode extends LightingNode {
 
@@ -25,42 +23,111 @@ class EnvironmentNode extends LightingNode {
 
 	}
 
-	construct( builder ) {
+	setup( builder ) {
 
-		const envNode = this.envNode;
-		const properties = builder.getNodeProperties( this );
+		let envNode = this.envNode;
 
-		let reflectVec = reflect( negate( positionViewDirection ), transformedNormalView );
-		reflectVec = normalize( mix( reflectVec, transformedNormalView, mul( roughness, roughness ) ) );
-		reflectVec = transformDirection( reflectVec, cameraViewMatrix );
+		if ( envNode.isTextureNode ) {
 
-		const radianceContext = new ContextNode( envNode, {
-			tempRead: false,
-			uvNode: reflectVec,
-			levelNode: roughness,
-			levelShaderNode: getSpecularMIPLevel
-		} );
+			let cacheEnvNode = envNodeCache.get( envNode.value );
 
-		const irradianceContext = new ContextNode( envNode, {
-			tempRead: false,
-			uvNode: transformedNormalWorld,
-			levelNode: float( 1 ),
-			levelShaderNode: getSpecularMIPLevel
-		} );
+			if ( cacheEnvNode === undefined ) {
 
-		// it's used to cache the construct only if necessary: See `CubeTextureNode.getConstructReference()`
-		radianceContext.context.environmentContext = radianceContext;
-		irradianceContext.context.environmentContext = irradianceContext;
+				cacheEnvNode = pmremTexture( envNode.value );
 
-		builder.context.radiance.add( radianceContext );
+				envNodeCache.set( envNode.value, cacheEnvNode );
 
-		builder.context.iblIrradiance.add( mul( Math.PI, irradianceContext ) );
+			}
 
-		properties.radianceContext = radianceContext;
-		properties.irradianceContext = irradianceContext;
+			envNode	= cacheEnvNode;
+
+		}
+
+		//
+
+		const { material } = builder;
+
+		const envMap = material.envMap;
+		const intensity = envMap ? reference( 'envMapIntensity', 'float', builder.material ) : reference( 'environmentIntensity', 'float', builder.scene ); // @TODO: Add materialEnvIntensity in MaterialNode
+
+		const useAnisotropy = material.useAnisotropy === true || material.anisotropy > 0;
+		const radianceNormalView = useAnisotropy ? transformedBentNormalView : transformedNormalView;
+
+		const radiance = context( envNode, createRadianceContext( roughness, radianceNormalView ) ).mul( intensity );
+		const irradiance = context( envNode, createIrradianceContext( transformedNormalWorld ) ).mul( Math.PI ).mul( intensity );
+
+		const isolateRadiance = cache( radiance );
+
+		//
+
+		builder.context.radiance.addAssign( isolateRadiance );
+
+		builder.context.iblIrradiance.addAssign( irradiance );
+
+		//
+
+		const clearcoatRadiance = builder.context.lightingModel.clearcoatRadiance;
+
+		if ( clearcoatRadiance ) {
+
+			const clearcoatRadianceContext = context( envNode, createRadianceContext( clearcoatRoughness, transformedClearcoatNormalView ) ).mul( intensity );
+			const isolateClearcoatRadiance = cache( clearcoatRadianceContext );
+
+			clearcoatRadiance.addAssign( isolateClearcoatRadiance );
+
+		}
 
 	}
 
 }
 
+const createRadianceContext = ( roughnessNode, normalViewNode ) => {
+
+	let reflectVec = null;
+
+	return {
+		getUV: () => {
+
+			if ( reflectVec === null ) {
+
+				reflectVec = positionViewDirection.negate().reflect( normalViewNode );
+
+				// Mixing the reflection with the normal is more accurate and keeps rough objects from gathering light from behind their tangent plane.
+				reflectVec = roughnessNode.mul( roughnessNode ).mix( reflectVec, normalViewNode ).normalize();
+
+				reflectVec = reflectVec.transformDirection( cameraViewMatrix );
+
+			}
+
+			return reflectVec;
+
+		},
+		getTextureLevel: () => {
+
+			return roughnessNode;
+
+		}
+	};
+
+};
+
+const createIrradianceContext = ( normalWorldNode ) => {
+
+	return {
+		getUV: () => {
+
+			return normalWorldNode;
+
+		},
+		getTextureLevel: () => {
+
+			return float( 1.0 );
+
+		}
+	};
+
+};
+
 export default EnvironmentNode;
+
+addNodeClass( 'EnvironmentNode', EnvironmentNode );

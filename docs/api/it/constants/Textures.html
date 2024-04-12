@@ -125,6 +125,7 @@
 		THREE.UnsignedShort4444Type
 		THREE.UnsignedShort5551Type
 		THREE.UnsignedInt248Type
+		THREE.UnsignedInt5999Type
 		</code>
 		<p>
       Da usare con la proprietà [page:Texture.type type] della texture, la quale deve corrispondere al formato corretto. Vedi sotto per i dettagli.<br /><br />
@@ -139,6 +140,7 @@
 		THREE.RedIntegerFormat
 		THREE.RGFormat
 		THREE.RGIntegerFormat
+		THREE.RGBFormat
 		THREE.RGBAFormat
 		THREE.RGBAIntegerFormat
 		THREE.LuminanceFormat
@@ -155,21 +157,17 @@
       [page:constant RedFormat] elimina i componenti verde e blu e legge solo il componente rosso.<br /><br />
 
       [page:constant RedIntegerFormat] elimina i componenti verde e blu e legge solo il componente rosso.
-      I texel sono letti come interi invece che come floating point.
-      (può essere utilizzato solo in un contesto di rendering WebGL 2).<br /><br />
+      I texel sono letti come interi invece che come floating point.<br /><br />
 
-      [page:constant RGFormat] elimina i componenti alfa e blu e legge i componenti rosso e verde.
-      (può essere utilizzato solo in un contesto di rendering WebGL 2).<br /><br />
+      [page:constant RGFormat] elimina i componenti alfa e blu e legge i componenti rosso e verde.<br /><br />
 
       [page:constant RGIntegerFormat] elimina i componenti alfa e blu e legge i componenti rosso e verde.
-      I texel sono letti come numeri interi invece che come floating point.
-      (può essere utilizzato solo in un contesto di rendering WebGL 2).<br /><br />
+      I texel sono letti come numeri interi invece che come floating point.<br /><br />
 
       [page:constant RGBAFormat] è l'impostazione predefinita e legge i componenti rosso, verde, blu e alfa.<br /><br />
 
       [page:constant RGBAIntegerFormat] è l'impostazione di default e legge i componenti rosso, verde, blu e alfa.
-      I texel sono letti come numeri interi invece che come floating point.
-      (può essere utilizzato solo in un contesto di rendering WebGL 2).<br /><br />
+      I texel sono letti come numeri interi invece che come floating point.<br /><br />
 
       [page:constant LuminanceFormat] legge ogni elemento come un singolo componente di luminanza.
       Questo viene quindi convertito in floating point, fissato all'intervallo [0,1], e quindi assemblato
@@ -346,9 +344,6 @@
 		</code>
 
 		<p>
-      Attenzione: la modifica di un formato interno di una texture avrà effetto solo 
-      quando si utilizza un contesto di rendering WebGL 2.<br /><br />
-
       Da usare con la proprietà [page:Texture.internalFormat internalFormat] della texture,
       definiscono come gli elementi della texture, o `toxel`, sono memorizzati nella GPU.<br /><br />
 
@@ -534,23 +529,27 @@
     [link:https://www.khronos.org/registry/OpenGL/specs/es/3.0/es_spec_3.0.pdf Specifica OpenGL ES 3.0].
 		</p>
 
-		<h2>Encoding</h2>
+		<h2>Depth Packing</h2>
 		<code>
-		THREE.LinearEncoding
-		THREE.sRGBEncoding
 		THREE.BasicDepthPacking
 		THREE.RGBADepthPacking
 		</code>
 		<p>
-      Da usare con la proprietà [page:Texture.encoding encoding] della Texture.<br /><br />
+			For use with the [page:MeshDepthMaterial.depthPacking depthPacking] property of `MeshDepthMaterial`.
+		</p>
 
-      Se il tipo di encoding viene modificato dopo che la texture è già stata utilizzata dal materiale,
-      sarà necessario impostare il valore [page:Material.needsUpdate Material.needsUpdate] a `true` per fare in modo
-      che il materiale venga ricompilato.<br /><br />
-      
-      [page:constant LinearEncoding] è l'impostazione predefinita.
-      Valori diversi da questo sono validi solo per la mappa di un materiale, envMap ed emissiveMap.
-		</p> 
+		<h2>Color Space</h2>
+		<code>
+		THREE.NoColorSpace = ""
+		THREE.SRGBColorSpace = "srgb"
+		THREE.LinearSRGBColorSpace = "srgb-linear"
+		</code>
+		<p>
+		Used to define the color space of textures (and the output color space of the renderer).<br /><br />
+
+		If the color space type is changed after the texture has already been used by a material,
+		you will need to set [page:Material.needsUpdate Material.needsUpdate] to `true` to make the material recompile.<br /><br />
+		</p>
 
 		<h2>Source</h2>
 

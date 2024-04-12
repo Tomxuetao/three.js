@@ -6,12 +6,7 @@ export default QUnit.module( 'Animation', () => {
 
 	QUnit.module( 'AnimationUtils', () => {
 
-		// PUBLIC STUFF
-		QUnit.todo( 'arraySlice', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
+		// PUBLIC
 
 		QUnit.todo( 'convertArray', ( assert ) => {
 
@@ -38,6 +33,18 @@ export default QUnit.module( 'Animation', () => {
 		} );
 
 		QUnit.todo( 'flattenJSON', ( assert ) => {
+
+			assert.ok( false, 'everything\'s gonna be alright' );
+
+		} );
+
+		QUnit.todo( 'subclip', ( assert ) => {
+
+			assert.ok( false, 'everything\'s gonna be alright' );
+
+		} );
+
+		QUnit.todo( 'makeClipAdditive', ( assert ) => {
 
 			assert.ok( false, 'everything\'s gonna be alright' );
 

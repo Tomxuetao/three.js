@@ -5,7 +5,7 @@ import { Loader } from './Loader.js';
 import { History as _History } from './History.js';
 import { Strings } from './Strings.js';
 import { Storage as _Storage } from './Storage.js';
-import { Selector } from './Viewport.Selector.js';
+import { Selector } from './Selector.js';
 
 var _DEFAULT_CAMERA = new THREE.PerspectiveCamera( 50, 1, 0.01, 1000 );
 _DEFAULT_CAMERA.name = 'Camera';
@@ -27,10 +27,11 @@ function Editor() {
 		startPlayer: new Signal(),
 		stopPlayer: new Signal(),
 
-		// vr
+		// xr
 
-		toggleVR: new Signal(),
-		exitedVR: new Signal(),
+		enterXR: new Signal(),
+		offerXR: new Signal(),
+		leaveXR: new Signal(),
 
 		// notifications
 
@@ -44,6 +45,7 @@ function Editor() {
 		spaceChanged: new Signal(),
 		rendererCreated: new Signal(),
 		rendererUpdated: new Signal(),
+		rendererDetectKTX2Support: new Signal(),
 
 		sceneBackgroundChanged: new Signal(),
 		sceneEnvironmentChanged: new Signal(),
@@ -83,9 +85,11 @@ function Editor() {
 		showGridChanged: new Signal(),
 		showHelpersChanged: new Signal(),
 		refreshSidebarObject3D: new Signal(),
+		refreshSidebarEnvironment: new Signal(),
 		historyChanged: new Signal(),
 
 		viewportCameraChanged: new Signal(),
+		viewportShadingChanged: new Signal(),
 
 		intersectionsDetected: new Signal(),
 
@@ -93,9 +97,9 @@ function Editor() {
 
 	this.config = new Config();
 	this.history = new _History( this );
+	this.selector = new Selector( this );
 	this.storage = new _Storage();
 	this.strings = new Strings( this.config );
-	this.selector = new Selector( this );
 
 	this.loader = new Loader( this );
 
@@ -105,6 +109,7 @@ function Editor() {
 	this.scene.name = 'Scene';
 
 	this.sceneHelpers = new THREE.Scene();
+	this.sceneHelpers.add( new THREE.HemisphereLight( 0xffffff, 0x888888, 2 ) );
 
 	this.object = {};
 	this.geometries = {};
@@ -120,7 +125,9 @@ function Editor() {
 	this.helpers = {};
 
 	this.cameras = {};
+
 	this.viewportCamera = this.camera;
+	this.viewportShading = 'default';
 
 	this.addCamera( this.camera );
 
@@ -136,6 +143,8 @@ Editor.prototype = {
 		this.scene.background = scene.background;
 		this.scene.environment = scene.environment;
 		this.scene.fog = scene.fog;
+		this.scene.backgroundBlurriness = scene.backgroundBlurriness;
+		this.scene.backgroundIntensity = scene.backgroundIntensity;
 
 		this.scene.userData = JSON.parse( JSON.stringify( scene.userData ) );
 
@@ -426,7 +435,7 @@ Editor.prototype = {
 
 					helper = new THREE.SkeletonHelper( object.skeleton.bones[ 0 ] );
 
-				} else if ( object.isBone === true && object.parent?.isBone !== true ) {
+				} else if ( object.isBone === true && object.parent && object.parent.isBone !== true ) {
 
 					helper = new THREE.SkeletonHelper( object );
 
@@ -535,6 +544,13 @@ Editor.prototype = {
 
 	},
 
+	setViewportShading: function ( value ) {
+
+		this.viewportShading = value;
+		this.signals.viewportShadingChanged.dispatch();
+
+	},
+
 	//
 
 	select: function ( object ) {
@@ -610,11 +626,15 @@ Editor.prototype = {
 
 		var objects = this.scene.children;
 
+		this.signals.sceneGraphChanged.active = false;
+
 		while ( objects.length > 0 ) {
 
 			this.removeObject( objects[ 0 ] );
 
 		}
+
+		this.signals.sceneGraphChanged.active = true;
 
 		this.geometries = {};
 		this.materials = {};
@@ -647,6 +667,13 @@ Editor.prototype = {
 
 		this.setScene( await loader.parseAsync( json.scene ) );
 
+		if ( json.environment === 'ModelViewer' ) {
+
+			this.signals.sceneEnvironmentChanged.dispatch( json.environment );
+			this.signals.refreshSidebarEnvironment.dispatch();
+
+		}
+
 	},
 
 	toJSON: function () {
@@ -668,6 +695,16 @@ Editor.prototype = {
 
 		}
 
+		// honor modelviewer environment
+
+		let environment = null;
+
+		if ( this.scene.environment !== null && this.scene.environment.isRenderTargetTexture === true ) {
+
+			environment = 'ModelViewer';
+
+		}
+
 		//
 
 		return {
@@ -676,15 +713,14 @@ Editor.prototype = {
 			project: {
 				shadows: this.config.getKey( 'project/renderer/shadows' ),
 				shadowType: this.config.getKey( 'project/renderer/shadowType' ),
-				vr: this.config.getKey( 'project/vr' ),
-				physicallyCorrectLights: this.config.getKey( 'project/renderer/physicallyCorrectLights' ),
 				toneMapping: this.config.getKey( 'project/renderer/toneMapping' ),
 				toneMappingExposure: this.config.getKey( 'project/renderer/toneMappingExposure' )
 			},
-			camera: this.camera.toJSON(),
+			camera: this.viewportCamera.toJSON(),
 			scene: this.scene.toJSON(),
 			scripts: this.scripts,
-			history: this.history.toJSON()
+			history: this.history.toJSON(),
+			environment: environment
 
 		};
 
@@ -712,8 +748,44 @@ Editor.prototype = {
 
 		this.history.redo();
 
+	},
+
+	utils: {
+
+		save: save,
+		saveArrayBuffer: saveArrayBuffer,
+		saveString: saveString
+
 	}
 
 };
+
+const link = document.createElement( 'a' );
+
+function save( blob, filename ) {
+
+	if ( link.href ) {
+
+		URL.revokeObjectURL( link.href );
+
+	}
+
+	link.href = URL.createObjectURL( blob );
+	link.download = filename || 'data.json';
+	link.dispatchEvent( new MouseEvent( 'click' ) );
+
+}
+
+function saveArrayBuffer( buffer, filename ) {
+
+	save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
+
+}
+
+function saveString( text, filename ) {
+
+	save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+
+}
 
 export { Editor };

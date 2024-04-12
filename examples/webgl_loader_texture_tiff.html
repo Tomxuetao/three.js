@@ -11,10 +11,6 @@
 			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - TIFF texture loader</a>
 		</div>
 
-		<!-- Import maps polyfill -->
-		<!-- Remove this when import maps will be widely supported -->
-		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
-
 		<script type="importmap">
 			{
 				"imports": {
@@ -54,6 +50,8 @@
 
 				loader.load( 'textures/tiff/crate_uncompressed.tif', function ( texture ) {
 
+					texture.colorSpace = THREE.SRGBColorSpace;
+
 					const material = new THREE.MeshBasicMaterial( { map: texture } );
 
 					const mesh = new THREE.Mesh( geometry, material );
@@ -69,6 +67,8 @@
 
 				loader.load( 'textures/tiff/crate_lzw.tif', function ( texture ) {
 
+					texture.colorSpace = THREE.SRGBColorSpace;
+
 					const material = new THREE.MeshBasicMaterial( { map: texture } );
 
 					const mesh = new THREE.Mesh( geometry, material );
@@ -83,6 +83,8 @@
 				// JPEG
 
 				loader.load( 'textures/tiff/crate_jpeg.tif', function ( texture ) {
+
+					texture.colorSpace = THREE.SRGBColorSpace;
 
 					const material = new THREE.MeshBasicMaterial( { map: texture } );
 
