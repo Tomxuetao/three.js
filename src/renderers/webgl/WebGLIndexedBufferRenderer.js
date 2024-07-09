@@ -40,18 +40,37 @@ function WebGLIndexedBufferRenderer( gl, extensions, info ) {
 		if ( drawCount === 0 ) return;
 
 		const extension = extensions.get( 'WEBGL_multi_draw' );
+		extension.multiDrawElementsWEBGL( mode, counts, 0, type, starts, 0, drawCount );
+
+		let elementCount = 0;
+		for ( let i = 0; i < drawCount; i ++ ) {
+
+			elementCount += counts[ i ];
+
+		}
+
+		info.update( elementCount, mode, 1 );
+
+
+	}
+
+	function renderMultiDrawInstances( starts, counts, drawCount, primcount ) {
+
+		if ( drawCount === 0 ) return;
+
+		const extension = extensions.get( 'WEBGL_multi_draw' );
 
 		if ( extension === null ) {
 
-			for ( let i = 0; i < drawCount; i ++ ) {
+			for ( let i = 0; i < starts.length; i ++ ) {
 
-				this.render( starts[ i ] / bytesPerElement, counts[ i ] );
+				renderInstances( starts[ i ] / bytesPerElement, counts[ i ], primcount[ i ] );
 
 			}
 
 		} else {
 
-			extension.multiDrawElementsWEBGL( mode, counts, 0, type, starts, 0, drawCount );
+			extension.multiDrawElementsInstancedWEBGL( mode, counts, 0, type, starts, 0, primcount, 0, drawCount );
 
 			let elementCount = 0;
 			for ( let i = 0; i < drawCount; i ++ ) {
@@ -60,7 +79,11 @@ function WebGLIndexedBufferRenderer( gl, extensions, info ) {
 
 			}
 
-			info.update( elementCount, mode, 1 );
+			for ( let i = 0; i < primcount.length; i ++ ) {
+
+				info.update( elementCount, mode, primcount[ i ] );
+
+			}
 
 		}
 
@@ -73,6 +96,7 @@ function WebGLIndexedBufferRenderer( gl, extensions, info ) {
 	this.render = render;
 	this.renderInstances = renderInstances;
 	this.renderMultiDraw = renderMultiDraw;
+	this.renderMultiDrawInstances = renderMultiDrawInstances;
 
 }
 
