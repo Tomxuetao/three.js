@@ -1,6 +1,6 @@
-import Node, { addNodeClass } from '../core/Node.js';
+import Node from '../core/Node.js';
 import { scriptableValue } from './ScriptableValueNode.js';
-import { addNodeElement, nodeProxy, float } from '../shadernode/ShaderNode.js';
+import { nodeProxy, float } from '../tsl/TSLBase.js';
 
 class Resources extends Map {
 
@@ -60,6 +60,12 @@ class Parameters {
 export const global = new Resources();
 
 class ScriptableNode extends Node {
+
+	static get type() {
+
+		return 'ScriptableNode';
+
+	}
 
 	constructor( codeNode = null, parameters = {} ) {
 
@@ -437,6 +443,20 @@ class ScriptableNode extends Node {
 
 	}
 
+	getCacheKey( force ) {
+
+		const cacheKey = [ this.source, this.getDefaultOutputNode().getCacheKey( force ) ];
+
+		for ( const param in this.parameters ) {
+
+			cacheKey.push( this.parameters[ param ].getCacheKey( force ) );
+
+		}
+
+		return cacheKey.join( ',' );
+
+	}
+
 	set needsUpdate( value ) {
 
 		if ( value === true ) this.dispose();
@@ -481,8 +501,4 @@ class ScriptableNode extends Node {
 
 export default ScriptableNode;
 
-export const scriptable = nodeProxy( ScriptableNode );
-
-addNodeElement( 'scriptable', scriptable );
-
-addNodeClass( 'ScriptableNode', ScriptableNode );
+export const scriptable = /*@__PURE__*/ nodeProxy( ScriptableNode );

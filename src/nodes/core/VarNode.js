@@ -1,7 +1,13 @@
-import Node, { addNodeClass } from './Node.js';
-import { addNodeElement, nodeProxy } from '../shadernode/ShaderNode.js';
+import Node from './Node.js';
+import { addMethodChaining, nodeProxy } from '../tsl/TSLCore.js';
 
 class VarNode extends Node {
+
+	static get type() {
+
+		return 'VarNode';
+
+	}
 
 	constructor( node, name = null ) {
 
@@ -48,9 +54,7 @@ class VarNode extends Node {
 
 export default VarNode;
 
-export const temp = nodeProxy( VarNode );
+export const temp = /*@__PURE__*/ nodeProxy( VarNode );
 
-addNodeElement( 'temp', temp ); // @TODO: Will be removed in the future
-addNodeElement( 'toVar', ( ...params ) => temp( ...params ).append() );
-
-addNodeClass( 'VarNode', VarNode );
+addMethodChaining( 'temp', temp ); // @TODO: Will be removed in the future
+addMethodChaining( 'toVar', ( ...params ) => temp( ...params ).append() );

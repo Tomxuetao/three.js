@@ -1,22 +1,30 @@
 import TempNode from '../core/TempNode.js';
-import { nodeObject, addNodeElement, tslFn, float, vec2, vec4 } from '../shadernode/ShaderNode.js';
+import { nodeObject, Fn, float, vec2, vec4 } from '../tsl/TSLBase.js';
 import { NodeUpdateType } from '../core/constants.js';
 import { mul } from '../math/OperatorNode.js';
-import { uv } from '../accessors/UVNode.js';
-import { texturePass } from './PassNode.js';
+import { uv } from '../accessors/UV.js';
+import { passTexture } from './PassNode.js';
 import { uniform } from '../core/UniformNode.js';
+import { convertToTexture } from '../utils/RTTNode.js';
 import QuadMesh from '../../renderers/common/QuadMesh.js';
 
 import { Vector2 } from '../../math/Vector2.js';
 import { RenderTarget } from '../../core/RenderTarget.js';
+import NodeMaterial from '../../materials/nodes/NodeMaterial.js';
 
 // WebGPU: The use of a single QuadMesh for both gaussian blur passes results in a single RenderObject with a SampledTexture binding that
 // alternates between source textures and triggers creation of new BindGroups and BindGroupLayouts every frame.
 
-const quadMesh1 = new QuadMesh();
-const quadMesh2 = new QuadMesh();
+const _quadMesh1 = /*@__PURE__*/ new QuadMesh();
+const _quadMesh2 = /*@__PURE__*/ new QuadMesh();
 
 class GaussianBlurNode extends TempNode {
+
+	static get type() {
+
+		return 'GaussianBlurNode';
+
+	}
 
 	constructor( textureNode, directionNode = null, sigma = 2 ) {
 
@@ -34,7 +42,7 @@ class GaussianBlurNode extends TempNode {
 		this._verticalRT = new RenderTarget();
 		this._verticalRT.texture.name = 'GaussianBlurNode.vertical';
 
-		this._textureNode = texturePass( this, this._verticalRT.texture );
+		this._textureNode = passTexture( this, this._verticalRT.texture );
 
 		this.updateBeforeType = NodeUpdateType.RENDER;
 
@@ -61,10 +69,12 @@ class GaussianBlurNode extends TempNode {
 		const map = textureNode.value;
 
 		const currentRenderTarget = renderer.getRenderTarget();
+		const currentMRT = renderer.getMRT();
+
 		const currentTexture = textureNode.value;
 
-		quadMesh1.material = this._material;
-		quadMesh2.material = this._material;
+		_quadMesh1.material = this._material;
+		_quadMesh2.material = this._material;
 
 		this.setSize( map.image.width, map.image.height );
 
@@ -73,13 +83,17 @@ class GaussianBlurNode extends TempNode {
 		this._horizontalRT.texture.type = textureType;
 		this._verticalRT.texture.type = textureType;
 
+		// clear
+
+		renderer.setMRT( null );
+
 		// horizontal
 
 		renderer.setRenderTarget( this._horizontalRT );
 
 		this._passDirection.value.set( 1, 0 );
 
-		quadMesh1.render( renderer );
+		_quadMesh1.render( renderer );
 
 		// vertical
 
@@ -88,11 +102,12 @@ class GaussianBlurNode extends TempNode {
 
 		this._passDirection.value.set( 0, 1 );
 
-		quadMesh2.render( renderer );
+		_quadMesh2.render( renderer );
 
 		// restore
 
 		renderer.setRenderTarget( currentRenderTarget );
+		renderer.setMRT( currentMRT );
 		textureNode.value = currentTexture;
 
 	}
@@ -122,7 +137,7 @@ class GaussianBlurNode extends TempNode {
 
 		const sampleTexture = ( uv ) => textureNode.uv( uv );
 
-		const blur = tslFn( () => {
+		const blur = Fn( () => {
 
 			const kernelSize = 3 + ( 2 * this.sigma );
 			const gaussianCoefficients = this._getCoefficients( kernelSize );
@@ -154,8 +169,9 @@ class GaussianBlurNode extends TempNode {
 
 		//
 
-		const material = this._material || ( this._material = builder.createNodeMaterial() );
+		const material = this._material || ( this._material = new NodeMaterial() );
 		material.fragmentNode = blur().context( builder.getSharedContext() );
+		material.name = 'Gaussian_blur';
 		material.needsUpdate = true;
 
 		//
@@ -166,6 +182,13 @@ class GaussianBlurNode extends TempNode {
 		//
 
 		return this._textureNode;
+
+	}
+
+	dispose() {
+
+		this._horizontalRT.dispose();
+		this._verticalRT.dispose();
 
 	}
 
@@ -185,9 +208,6 @@ class GaussianBlurNode extends TempNode {
 
 }
 
-export const gaussianBlur = ( node, directionNode, sigma ) => nodeObject( new GaussianBlurNode( nodeObject( node ).toTexture(), directionNode, sigma ) );
-
-addNodeElement( 'gaussianBlur', gaussianBlur );
-
 export default GaussianBlurNode;
 
+export const gaussianBlur = ( node, directionNode, sigma ) => nodeObject( new GaussianBlurNode( convertToTexture( node ), directionNode, sigma ) );

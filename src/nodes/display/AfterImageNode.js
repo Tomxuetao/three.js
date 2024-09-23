@@ -1,21 +1,29 @@
 import TempNode from '../core/TempNode.js';
-import { nodeObject, addNodeElement, tslFn, float, vec4 } from '../shadernode/ShaderNode.js';
+import { nodeObject, Fn, float, vec4 } from '../tsl/TSLBase.js';
 import { NodeUpdateType } from '../core/constants.js';
-import { uv } from '../accessors/UVNode.js';
+import { uv } from '../accessors/UV.js';
 import { texture } from '../accessors/TextureNode.js';
-import { texturePass } from './PassNode.js';
+import { passTexture } from './PassNode.js';
 import { uniform } from '../core/UniformNode.js';
 import { sign, max } from '../math/MathNode.js';
+import { convertToTexture } from '../utils/RTTNode.js';
 import QuadMesh from '../../renderers/common/QuadMesh.js';
+import NodeMaterial from '../../materials/nodes/NodeMaterial.js';
 
 import { Vector2 } from '../../math/Vector2.js';
 import { RenderTarget } from '../../core/RenderTarget.js';
 
-const _size = new Vector2();
+const _size = /*@__PURE__*/ new Vector2();
 
-const quadMeshComp = new QuadMesh();
+const _quadMeshComp = /*@__PURE__*/ new QuadMesh();
 
 class AfterImageNode extends TempNode {
+
+	static get type() {
+
+		return 'AfterImageNode';
+
+	}
 
 	constructor( textureNode, damp = 0.96 ) {
 
@@ -31,7 +39,7 @@ class AfterImageNode extends TempNode {
 		this._oldRT = new RenderTarget();
 		this._oldRT.texture.name = 'AfterImageNode.old';
 
-		this._textureNode = texturePass( this, this._compRT.texture );
+		this._textureNode = passTexture( this, this._compRT.texture );
 
 		this.updateBeforeType = NodeUpdateType.RENDER;
 
@@ -73,7 +81,7 @@ class AfterImageNode extends TempNode {
 
 		// comp
 		renderer.setRenderTarget( this._compRT );
-		quadMeshComp.render( renderer );
+		_quadMeshComp.render( renderer );
 
 		// Swap the textures
 		const temp = this._oldRT;
@@ -98,7 +106,7 @@ class AfterImageNode extends TempNode {
 
 		const sampleTexture = ( uv ) => textureNode.uv( uv );
 
-		const when_gt = tslFn( ( [ x_immutable, y_immutable ] ) => {
+		const when_gt = Fn( ( [ x_immutable, y_immutable ] ) => {
 
 			const y = float( y_immutable ).toVar();
 			const x = vec4( x_immutable ).toVar();
@@ -107,7 +115,7 @@ class AfterImageNode extends TempNode {
 
 		} );
 
-		const afterImg = tslFn( () => {
+		const afterImg = Fn( () => {
 
 			const texelOld = vec4( textureNodeOld );
 			const texelNew = vec4( sampleTexture( uvNode ) );
@@ -119,10 +127,11 @@ class AfterImageNode extends TempNode {
 
 		//
 
-		const materialComposed = this._materialComposed || ( this._materialComposed = builder.createNodeMaterial() );
+		const materialComposed = this._materialComposed || ( this._materialComposed = new NodeMaterial() );
+		materialComposed.name = 'AfterImage';
 		materialComposed.fragmentNode = afterImg();
 
-		quadMeshComp.material = materialComposed;
+		_quadMeshComp.material = materialComposed;
 
 		//
 
@@ -135,11 +144,15 @@ class AfterImageNode extends TempNode {
 
 	}
 
+	dispose() {
+
+		this._compRT.dispose();
+		this._oldRT.dispose();
+
+	}
+
 }
 
-export const afterImage = ( node, damp ) => nodeObject( new AfterImageNode( nodeObject( node ).toTexture(), damp ) );
-
-addNodeElement( 'afterImage', afterImage );
+export const afterImage = ( node, damp ) => nodeObject( new AfterImageNode( convertToTexture( node ), damp ) );
 
 export default AfterImageNode;
-

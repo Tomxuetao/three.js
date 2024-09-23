@@ -115,29 +115,27 @@ const exceptionList = [
 	'webgpu_compute_audio',
 	'webgpu_compute_texture',
 	'webgpu_compute_texture_pingpong',
+	"webgpu_compute_water",
 	'webgpu_materials',
 	'webgpu_sandbox',
 	'webgpu_sprites',
 	'webgpu_video_panorama',
+	'webgpu_postprocessing_bloom_emissive',
 
 	// Awaiting for WebGPU Backend support in Puppeteer
 	'webgpu_storage_buffer',
+	'webgpu_compute_sort_bitonic',
 
 	// WebGPURenderer: Unknown problem
-	'webgpu_postprocessing_afterimage',
-	'webgpu_postprocessing_3dlut',
-	'webgpu_backdrop_water',
 	'webgpu_camera_logarithmicdepthbuffer',
 	'webgpu_clipping',
-	'webgpu_instance_points',
+	'webgpu_lightprobe_cubecamera',
 	'webgpu_loader_materialx',
-	'webgpu_materials_displacementmap',
 	'webgpu_materials_video',
 	'webgpu_materialx_noise',
 	'webgpu_morphtargets_face',
 	'webgpu_occlusion',
 	'webgpu_particles',
-	'webgpu_refraction',
 	'webgpu_shadertoy',
 	'webgpu_shadowmap',
 	'webgpu_tsl_editor',
@@ -146,19 +144,21 @@ const exceptionList = [
 	'webgpu_portal',
 	'webgpu_custom_fog',
 	'webgpu_instancing_morph',
-	'webgpu_mesh_batch',
 	'webgpu_texturegrad',
 	'webgpu_performance_renderbundle',
 	'webgpu_lights_rectarealight',
-	'webgpu_postprocessing',
-	'misc_controls_fly',
+	'webgpu_tsl_coffee_smoke',
+	'webgpu_tsl_vfx_flames',
+	'webgpu_tsl_halftone',
+	'webgpu_tsl_vfx_linkedparticles',
+	'webgpu_tsl_vfx_tornado',
+	'webgpu_textures_anisotropy',
 
 	// WebGPU idleTime and parseTime too low
 	'webgpu_compute_particles',
 	'webgpu_compute_particles_rain',
 	'webgpu_compute_particles_snow',
-	'webgpu_compute_points',
-	'webgpu_materials_texture_anisotropy'
+	'webgpu_compute_points'
 
 ];
 
@@ -205,9 +205,26 @@ async function main() {
 
 	/* Find files */
 
-	const isMakeScreenshot = process.argv[ 2 ] === '--make';
+	let isMakeScreenshot = false;
+	let isWebGPU = false;
 
-	const exactList = process.argv.slice( isMakeScreenshot ? 3 : 2 )
+	let argvIndex = 2;
+
+	if ( process.argv[ argvIndex ] === '--webgpu' ) {
+
+		isWebGPU = true;
+		argvIndex ++;
+
+	}
+
+	if ( process.argv[ argvIndex ] === '--make' ) {
+
+		isMakeScreenshot = true;
+		argvIndex ++;
+
+	}
+
+	const exactList = process.argv.slice( argvIndex )
 		.map( f => f.replace( '.html', '' ) );
 
 	const isExactList = exactList.length !== 0;
@@ -230,6 +247,8 @@ async function main() {
 		}
 
 	}
+
+	if ( isWebGPU ) files = files.filter( f => f.includes( 'webgpu_' ) );
 
 	/* CI parallelism */
 

@@ -168,7 +168,15 @@
 			[page:Integer instanceId]: The id of an instance to get the visibility state of.
 		</p>
 		<p>Get whether the given instance is marked as "visible" or not.</p>
-
+		
+		<h3>
+			[method:Integer getGeometryIdAt]( [param:Integer instanceId] )
+		</h3>
+		<p>
+			[page:Integer instanceId]: The id of an instance to get the geometryIndex of.
+		</p>
+		<p>Get the geometryIndex of the defined instance.</p>
+	
 		<h3>
 			[method:undefined setColorAt]( [param:Integer instanceId], [param:Color color] )
 		</h3>
@@ -208,6 +216,19 @@
 		</p>
 
 		<h3>
+			[method:this setGeometryIdAt]( [param:Integer instanceId], [param:Integer geometryId] )
+		</h3>
+		<p>
+			[page:Integer instanceId]: The id of the instance to set the geometryIndex of.
+		</p>
+		<p>
+			[page:Integer geometryId]: The geometryIndex to be use by the instance.
+		</p>
+		<p>
+			Sets the geometryIndex of the instance at the given index.
+		</p>
+
+		<h3>
 			[method:Integer addGeometry]( [param:BufferGeometry geometry], [param:Integer reservedVertexRange], [param:Integer reservedIndexRange] )
 		</h3>
 		<p>
@@ -236,6 +257,15 @@
 		<p>
 			Adds a new instance to the [name] using the geometry of the given geometryId and returns a new id referring to the new instance to be used
 			by other functions.
+		</p>
+		<h3>
+			[method:Integer deleteInstance]( [param:Integer instanceId] )
+		</h3>
+		<p>
+			[page:Integer instanceId]: The id of an instance to remove from the [name] that was previously added via "addInstance".
+		</p>
+		<p>
+			Removes an existing instance from the [name] using the given instanceId.
 		</p>
 
 		<h3>

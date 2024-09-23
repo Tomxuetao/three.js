@@ -135,7 +135,7 @@ class WebGLAttributeUtils {
 			bytesPerElement: array.BYTES_PER_ELEMENT,
 			version: attribute.version,
 			pbo: attribute.pbo,
-			isInteger: type === gl.INT || type === gl.UNSIGNED_INT || type === gl.UNSIGNED_SHORT || attribute.gpuType === IntType,
+			isInteger: type === gl.INT || type === gl.UNSIGNED_INT || attribute.gpuType === IntType,
 			id: _id ++
 		};
 
@@ -233,9 +233,15 @@ class WebGLAttributeUtils {
 
 		const dstBuffer = new attribute.array.constructor( array.length );
 
+		// Ensure the buffer is bound before reading
+		gl.bindBuffer( gl.COPY_WRITE_BUFFER, writeBuffer );
+
 		gl.getBufferSubData( gl.COPY_WRITE_BUFFER, 0, dstBuffer );
 
 		gl.deleteBuffer( writeBuffer );
+
+		gl.bindBuffer( gl.COPY_READ_BUFFER, null );
+		gl.bindBuffer( gl.COPY_WRITE_BUFFER, null );
 
 		return dstBuffer.buffer;
 

@@ -4,11 +4,15 @@ import { getNodeChildren, getCacheKey } from './NodeUtils.js';
 import { EventDispatcher } from '../../core/EventDispatcher.js';
 import { MathUtils } from '../../math/MathUtils.js';
 
-const NodeClasses = new Map();
-
 let _nodeId = 0;
 
 class Node extends EventDispatcher {
+
+	static get type() {
+
+		return 'Node';
+
+	}
 
 	constructor( nodeType = null ) {
 
@@ -149,6 +153,12 @@ class Node extends EventDispatcher {
 
 	}
 
+	getScope() {
+
+		return this;
+
+	}
+
 	getHash( /*builder*/ ) {
 
 		return this.uuid;
@@ -222,26 +232,9 @@ class Node extends EventDispatcher {
 
 	}
 
-	construct( builder ) { // @deprecated, r157
-
-		console.warn( 'THREE.Node: construct() is deprecated. Use setup() instead.' );
-
-		return this.setup( builder );
-
-	}
-
-	increaseUsage( builder ) {
-
-		const nodeData = builder.getDataFromNode( this );
-		nodeData.usageCount = nodeData.usageCount === undefined ? 1 : nodeData.usageCount + 1;
-
-		return nodeData.usageCount;
-
-	}
-
 	analyze( builder ) {
 
-		const usageCount = this.increaseUsage( builder );
+		const usageCount = builder.increaseUsage( this );
 
 		if ( usageCount === 1 ) {
 
@@ -330,7 +323,8 @@ class Node extends EventDispatcher {
 
 				if ( properties.outputNode !== null && builder.stack.nodes.length !== stackNodesBeforeSetup ) {
 
-					properties.outputNode = builder.stack;
+					// !! no outputNode !!
+					//properties.outputNode = builder.stack;
 
 				}
 
@@ -550,30 +544,3 @@ class Node extends EventDispatcher {
 }
 
 export default Node;
-
-export function addNodeClass( type, nodeClass ) {
-
-	if ( typeof nodeClass !== 'function' || ! type ) throw new Error( `Node class ${ type } is not a class` );
-	if ( NodeClasses.has( type ) ) {
-
-		console.warn( `Redefinition of node class ${ type }` );
-		return;
-
-	}
-
-	NodeClasses.set( type, nodeClass );
-	nodeClass.type = type;
-
-}
-
-export function createNodeFromType( type ) {
-
-	const Class = NodeClasses.get( type );
-
-	if ( Class !== undefined ) {
-
-		return new Class();
-
-	}
-
-}
