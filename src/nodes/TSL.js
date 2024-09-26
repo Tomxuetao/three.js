@@ -118,6 +118,7 @@ export * from './display/AnaglyphPassNode.js';
 export * from './display/ParallaxBarrierPassNode.js';
 export * from './display/BleachBypass.js';
 export * from './display/Sepia.js';
+export * from './display/ToonOutlinePassNode.js';
 
 export * from './display/PassNode.js';
 
@@ -142,6 +143,7 @@ export * from './geometry/RangeNode.js';
 
 // gpgpu
 export * from './gpgpu/ComputeNode.js';
+export * from './gpgpu/ComputeBuiltinNode.js';
 export * from './gpgpu/BarrierNode.js';
 export * from './gpgpu/WorkgroupInfoNode.js';
 export * from './gpgpu/AtomicFunctionNode.js';
