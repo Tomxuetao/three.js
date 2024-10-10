@@ -10,7 +10,7 @@ import { normalLocal } from '../../nodes/accessors/Normal.js';
 import { instance } from '../../nodes/accessors/InstanceNode.js';
 import { batch } from '../../nodes/accessors/BatchNode.js';
 import { materialReference } from '../../nodes/accessors/MaterialReferenceNode.js';
-import { positionLocal } from '../../nodes/accessors/Position.js';
+import { positionLocal, positionView } from '../../nodes/accessors/Position.js';
 import { skinningReference } from '../../nodes/accessors/SkinningNode.js';
 import { morphReference } from '../../nodes/accessors/MorphNode.js';
 import { lights } from '../../nodes/lighting/LightsNode.js';
@@ -19,8 +19,8 @@ import { float, vec3, vec4 } from '../../nodes/tsl/TSLBase.js';
 import AONode from '../../nodes/lighting/AONode.js';
 import { lightingContext } from '../../nodes/lighting/LightingContextNode.js';
 import IrradianceNode from '../../nodes/lighting/IrradianceNode.js';
-import { depth } from '../../nodes/display/ViewportDepthNode.js';
-import { cameraLogDepth } from '../../nodes/accessors/Camera.js';
+import { depth, perspectiveDepthToLogarithmicDepth, viewZToOrthographicDepth } from '../../nodes/display/ViewportDepthNode.js';
+import { cameraFar, cameraNear } from '../../nodes/accessors/Camera.js';
 import { clipping, clippingAlpha } from '../../nodes/accessors/ClippingNode.js';
 import NodeMaterialObserver from './manager/NodeMaterialObserver.js';
 
@@ -57,6 +57,7 @@ class NodeMaterial extends Material {
 		this.alphaTestNode = null;
 
 		this.positionNode = null;
+		this.geometryNode = null;
 
 		this.depthNode = null;
 		this.shadowNode = null;
@@ -97,6 +98,12 @@ class NodeMaterial extends Material {
 		builder.addStack();
 
 		builder.stack.outputNode = this.vertexNode || this.setupPosition( builder );
+
+		if ( this.geometryNode !== null ) {
+
+			builder.stack.outputNode = builder.stack.outputNode.bypass( this.geometryNode );
+
+		}
 
 		builder.addFlow( 'vertex', builder.removeStack() );
 
@@ -215,7 +222,7 @@ class NodeMaterial extends Material {
 
 	setupDepth( builder ) {
 
-		const { renderer } = builder;
+		const { renderer, camera } = builder;
 
 		// Depth
 
@@ -231,9 +238,15 @@ class NodeMaterial extends Material {
 
 			} else if ( renderer.logarithmicDepthBuffer === true ) {
 
-				const fragDepth = modelViewProjection().w.add( 1 );
+				if ( camera.isPerspectiveCamera ) {
 
-				depthNode = fragDepth.log2().mul( cameraLogDepth ).mul( 0.5 );
+					depthNode = perspectiveDepthToLogarithmicDepth( modelViewProjection().w, cameraNear, cameraFar );
+
+				} else {
+
+					depthNode = viewZToOrthographicDepth( positionView.z, cameraNear, cameraFar );
+
+				}
 
 			}
 
@@ -622,6 +635,7 @@ class NodeMaterial extends Material {
 		this.alphaTestNode = source.alphaTestNode;
 
 		this.positionNode = source.positionNode;
+		this.geometryNode = source.geometryNode;
 
 		this.depthNode = source.depthNode;
 		this.shadowNode = source.shadowNode;

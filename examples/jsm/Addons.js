@@ -124,7 +124,6 @@ export * from './loaders/TDSLoader.js';
 export * from './loaders/TGALoader.js';
 export * from './loaders/TIFFLoader.js';
 export * from './loaders/TTFLoader.js';
-export * from './loaders/TiltLoader.js';
 export * from './loaders/USDZLoader.js';
 export * from './loaders/VOXLoader.js';
 export * from './loaders/VRMLLoader.js';
@@ -275,7 +274,7 @@ export * as SceneUtils from './utils/SceneUtils.js';
 export * from './utils/ShadowMapViewer.js';
 export * as SkeletonUtils from './utils/SkeletonUtils.js';
 export * as SortUtils from './utils/SortUtils.js';
-export * from './utils/TextureUtils.js';
+export * from './utils/WebGLTextureUtils.js';
 export * from './utils/UVsDebug.js';
 export * from './utils/WorkerPool.js';
 
