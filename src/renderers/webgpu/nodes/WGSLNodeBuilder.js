@@ -57,19 +57,8 @@ const wgslTypeLib = {
 	bvec4: 'vec4<bool>',
 
 	mat2: 'mat2x2<f32>',
-	imat2: 'mat2x2<i32>',
-	umat2: 'mat2x2<u32>',
-	bmat2: 'mat2x2<bool>',
-
 	mat3: 'mat3x3<f32>',
-	imat3: 'mat3x3<i32>',
-	umat3: 'mat3x3<u32>',
-	bmat3: 'mat3x3<bool>',
-
-	mat4: 'mat4x4<f32>',
-	imat4: 'mat4x4<i32>',
-	umat4: 'mat4x4<u32>',
-	bmat4: 'mat4x4<bool>'
+	mat4: 'mat4x4<f32>'
 };
 
 const wgslPolyfill = {
@@ -386,7 +375,7 @@ class WGSLNodeBuilder extends NodeBuilder {
 
 				return name;
 
-			} else if ( type === 'buffer' || type === 'storageBuffer' ) {
+			} else if ( type === 'buffer' || type === 'storageBuffer' || type === 'indirectStorageBuffer' ) {
 
 				return `NodeBuffer_${ node.id }.${name}`;
 
@@ -525,9 +514,10 @@ class WGSLNodeBuilder extends NodeBuilder {
 
 				}
 
-			} else if ( type === 'buffer' || type === 'storageBuffer' ) {
+			} else if ( type === 'buffer' || type === 'storageBuffer' || type === 'indirectStorageBuffer' ) {
 
-				const bufferClass = type === 'storageBuffer' ? NodeStorageBuffer : NodeUniformBuffer;
+				const bufferClass = type === 'buffer' ? NodeUniformBuffer : NodeStorageBuffer;
+
 				const buffer = new bufferClass( node, group );
 				buffer.setVisibility( gpuShaderStageLib[ shaderStage ] );
 
@@ -1067,7 +1057,7 @@ ${ flowData.code }
 
 				bindingSnippets.push( `@binding( ${ uniformIndexes.binding ++ } ) @group( ${ uniformIndexes.group } ) var ${ uniform.name } : ${ textureType };` );
 
-			} else if ( uniform.type === 'buffer' || uniform.type === 'storageBuffer' ) {
+			} else if ( uniform.type === 'buffer' || uniform.type === 'storageBuffer' || uniform.type === 'indirectStorageBuffer' ) {
 
 				const bufferNode = uniform.node;
 				const bufferType = this.getType( bufferNode.bufferType );

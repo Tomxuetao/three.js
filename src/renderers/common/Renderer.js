@@ -15,6 +15,7 @@ import ClippingContext from './ClippingContext.js';
 import QuadMesh from './QuadMesh.js';
 import RenderBundles from './RenderBundles.js';
 import NodeLibrary from './nodes/NodeLibrary.js';
+import Lighting from './Lighting.js';
 
 import NodeMaterial from '../../materials/nodes/NodeMaterial.js';
 
@@ -82,10 +83,12 @@ class Renderer {
 		this.info = new Info();
 
 		this.nodes = {
-			library: new NodeLibrary(),
 			modelViewMatrix: null,
 			modelNormalViewMatrix: null
 		};
+
+		this.library = new NodeLibrary();
+		this.lighting = new Lighting();
 
 		// internals
 
@@ -238,7 +241,7 @@ class Renderer {
 			this._pipelines = new Pipelines( backend, this._nodes );
 			this._bindings = new Bindings( backend, this._nodes, this._textures, this._attributes, this._pipelines, this.info );
 			this._objects = new RenderObjects( this, this._nodes, this._geometries, this._pipelines, this._bindings, this.info );
-			this._renderLists = new RenderLists();
+			this._renderLists = new RenderLists( this.lighting );
 			this._bundles = new RenderBundles();
 			this._renderContexts = new RenderContexts();
 
@@ -392,6 +395,12 @@ class Renderer {
 		const renderContext = this._renderScene( scene, camera );
 
 		await this.backend.resolveTimestampAsync( renderContext, 'render' );
+
+	}
+
+	async waitForGPU() {
+
+		await this.backend.waitForGPU();
 
 	}
 
