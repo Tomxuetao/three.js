@@ -1,0 +1,25 @@
+{
+    "opts": {
+            "destination": "docs_new",
+            "encoding": "utf8",
+            "package": "package.json",
+            "recurse": true,
+            "template": "utils/docs/template"
+    },
+    "plugins": [ "plugins/markdown" ],
+    "source": {
+        "include": [
+            "examples/jsm/tsl",
+            "src/core/Object3D.js",
+            "src/core/EventDispatcher.js",
+            "src/loaders/nodes", 
+            "src/materials/nodes", 
+            "src/materials/Material.js", 
+            "src/nodes", 
+            "src/math/Box3.js", 
+            "src/renderers/common", 
+            "src/renderers/webgpu" ,
+            "src/textures/Texture.js" 
+        ]
+    }
+}

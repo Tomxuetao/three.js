@@ -122,6 +122,8 @@ class ThreeMFLoader extends Loader {
 
 			}
 
+			let rootModelFile = null;
+
 			for ( file in zip ) {
 
 				if ( file.match( /\_rels\/.rels$/ ) ) {
@@ -132,9 +134,13 @@ class ThreeMFLoader extends Loader {
 
 					modelRelsName = file;
 
-				} else if ( file.match( /^3D\/.*\.model$/ ) ) {
+				} else if ( file.match( /^3D\/[^\/]*\.model$/ ) ) {
 
-					modelPartNames.push( file );
+					rootModelFile = file;
+
+				} else if ( file.match( /^3D\/.*\/.*\.model$/ ) ) {
+
+					modelPartNames.push( file ); // sub models
 
 				} else if ( file.match( /^3D\/Textures?\/.*/ ) ) {
 
@@ -143,6 +149,8 @@ class ThreeMFLoader extends Loader {
 				}
 
 			}
+
+			modelPartNames.push( rootModelFile ); // push root model at the end so it is processed after the sub models
 
 			if ( relsName === undefined ) throw new Error( 'THREE.ThreeMFLoader: Cannot find relationship file `rels` in 3MF archive.' );
 
@@ -386,8 +394,11 @@ class ThreeMFLoader extends Loader {
 
 					const attrib = portNodes[ i ].attributes[ j ];
 					if ( attrib.specified ) {
+
 		 				args[ attrib.name ] = attrib.value;
+
 					}
+
 				}
 
 				portArguments[ portNodes[ i ].getAttribute( 'identifier' ) ] = args;
@@ -415,19 +426,19 @@ class ThreeMFLoader extends Loader {
 
 				if ( operatorNode.nodeName === 'i:in' || operatorNode.nodeName === 'i:out' ) {
 
-					operations[ operatorNode.nodeName === 'i:in' ? "inputs" : "outputs" ] = parseImplicitIONode( operatorNode );
+					operations[ operatorNode.nodeName === 'i:in' ? 'inputs' : 'outputs' ] = parseImplicitIONode( operatorNode );
 
 				} else {
 
 					const inputNodes = operatorNode.children;
-					let portArguments = { "op": operatorNode.nodeName.substring( 2 ), "identifier": operatorNode.getAttribute( 'identifier' ) };
+					const portArguments = { 'op': operatorNode.nodeName.substring( 2 ), 'identifier': operatorNode.getAttribute( 'identifier' ) };
 					for ( let i = 0; i < inputNodes.length; i ++ ) {
 
 						portArguments[ inputNodes[ i ].nodeName.substring( 2 ) ] = parseImplicitIONode( inputNodes[ i ] );
 
 					}
 
-					operations[ portArguments[ "identifier" ] ] = portArguments;
+					operations[ portArguments[ 'identifier' ] ] = portArguments;
 
 				}
 

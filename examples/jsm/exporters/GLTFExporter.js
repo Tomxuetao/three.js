@@ -190,7 +190,8 @@ class GLTFExporter {
 
 	/**
 	 * Parse scenes and generate GLTF output
-	 * @param  {Scene or [THREE.Scenes]} input   Scene or Array of THREE.Scenes
+	 *
+	 * @param  {Scene|Array<Scene>} input   Scene or Array of THREE.Scenes
 	 * @param  {Function} onDone  Callback on completed
 	 * @param  {Function} onError  Callback on errors
 	 * @param  {Object} options options
@@ -305,7 +306,7 @@ const GLB_CHUNK_TYPE_BIN = 0x004E4942;
  * Compare two arrays
  * @param  {Array} array1 Array 1 to compare
  * @param  {Array} array2 Array 2 to compare
- * @return {Boolean}        Returns true if both arrays are equal
+ * @return {boolean}        Returns true if both arrays are equal
  */
 function equalArray( array1, array2 ) {
 
@@ -332,7 +333,7 @@ function stringToArrayBuffer( text ) {
  * Is identity matrix
  *
  * @param {Matrix4} matrix
- * @returns {Boolean} Returns true, if parameter is identity matrix
+ * @returns {boolean} Returns true, if parameter is identity matrix
  */
 function isIdentityMatrix( matrix ) {
 
@@ -342,9 +343,10 @@ function isIdentityMatrix( matrix ) {
 
 /**
  * Get the min and max vectors from the given attribute
+ *
  * @param  {BufferAttribute} attribute Attribute to find the min/max in range from start to start + count
- * @param  {Integer} start
- * @param  {Integer} count
+ * @param  {number} start Start index
+ * @param  {number} count Range to cover
  * @return {Object} Object containing the `min` and `max` values (As an array of attribute.itemSize components)
  */
 function getMinMax( attribute, start, count ) {
@@ -398,8 +400,8 @@ function getMinMax( attribute, start, count ) {
  * Get the required size + padding for a buffer, rounded to the next 4-byte boundary.
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#data-alignment
  *
- * @param {Integer} bufferSize The size the original buffer.
- * @returns {Integer} new buffer size with required padding.
+ * @param {number} bufferSize The size the original buffer. Should be an integer.
+ * @returns {number} new buffer size with required padding as an integer.
  *
  */
 function getPaddedBufferSize( bufferSize ) {
@@ -412,7 +414,7 @@ function getPaddedBufferSize( bufferSize ) {
  * Returns a buffer aligned to 4-byte boundary.
  *
  * @param {ArrayBuffer} arrayBuffer Buffer to pad
- * @param {Integer} paddingByte (Optional)
+ * @param {number} [paddingByte=0] Should be an integer
  * @returns {ArrayBuffer} The same buffer if it's already aligned to 4-byte boundary or a new buffer
  */
 function getPaddedArrayBuffer( arrayBuffer, paddingByte = 0 ) {
@@ -543,9 +545,10 @@ class GLTFWriter {
 
 	/**
 	 * Parse scenes and generate GLTF output
-	 * @param  {Scene or [THREE.Scenes]} input   Scene or Array of THREE.Scenes
-	 * @param  {Function} onDone  Callback on completed
-	 * @param  {Object} options options
+	 *
+	 * @param {Scene|Array<Scene>} input Scene or Array of THREE.Scenes
+	 * @param {Function} onDone Callback on completed
+	 * @param {Object} options options
 	 */
 	async writeAsync( input, onDone, options = {} ) {
 
@@ -709,8 +712,10 @@ class GLTFWriter {
 
 	/**
 	 * Returns ids for buffer attributes.
-	 * @param  {Object} object
-	 * @return {Integer}
+	 *
+	 * @param  {Object} attribute
+	 * @param {boolean} [isRelativeCopy=false]
+	 * @return {number} An integer
 	 */
 	getUID( attribute, isRelativeCopy = false ) {
 
@@ -735,7 +740,7 @@ class GLTFWriter {
 	 * Checks if normal attribute values are normalized.
 	 *
 	 * @param {BufferAttribute} normal
-	 * @returns {Boolean}
+	 * @returns {boolean}
 	 */
 	isNormalizedNormalAttribute( normal ) {
 
@@ -964,7 +969,7 @@ class GLTFWriter {
 	/**
 	 * Process a buffer to append to the default one.
 	 * @param  {ArrayBuffer} buffer
-	 * @return {Integer}
+	 * @return {0}
 	 */
 	processBuffer( buffer ) {
 
@@ -982,11 +987,11 @@ class GLTFWriter {
 
 	/**
 	 * Process and generate a BufferView
-	 * @param  {BufferAttribute} attribute
-	 * @param  {number} componentType
-	 * @param  {number} start
-	 * @param  {number} count
-	 * @param  {number} target (Optional) Target usage of the BufferView
+	 * @param {BufferAttribute} attribute
+	 * @param {number} componentType
+	 * @param {number} start
+	 * @param {number} count
+	 * @param {?number} target Target usage of the BufferView
 	 * @return {Object}
 	 */
 	processBufferView( attribute, componentType, start, count, target ) {
@@ -1140,7 +1145,7 @@ class GLTFWriter {
 	/**
 	 * Process and generate a BufferView from an image Blob.
 	 * @param {Blob} blob
-	 * @return {Promise<Integer>}
+	 * @return {Promise<number>} An integer
 	 */
 	processBufferViewImage( blob ) {
 
@@ -1174,11 +1179,11 @@ class GLTFWriter {
 
 	/**
 	 * Process attribute to generate an accessor
-	 * @param  {BufferAttribute} attribute Attribute to process
-	 * @param  {THREE.BufferGeometry} geometry (Optional) Geometry used for truncated draw range
-	 * @param  {Integer} start (Optional)
-	 * @param  {Integer} count (Optional)
-	 * @return {Integer|null} Index of the processed accessor on the "accessors" array
+	 * @param {BufferAttribute} attribute Attribute to process
+	 * @param {?BufferGeometry} geometry Geometry used for truncated draw range
+	 * @param {number} [start=0]
+	 * @param {number} [count=Infinity]
+	 * @return {?number} Index of the processed accessor on the "accessors" array
 	 */
 	processAccessor( attribute, geometry, start, count ) {
 
@@ -1273,10 +1278,10 @@ class GLTFWriter {
 	/**
 	 * Process image
 	 * @param  {Image} image to process
-	 * @param  {Integer} format of the image (RGBAFormat)
-	 * @param  {Boolean} flipY before writing out the image
-	 * @param  {String} mimeType export format
-	 * @return {Integer}     Index of the processed texture in the "images" array
+	 * @param  {number} format Identifier of the format (RGBAFormat)
+	 * @param  {boolean} flipY before writing out the image
+	 * @param  {string} mimeType export format
+	 * @return {number}     Index of the processed texture in the "images" array
 	 */
 	processImage( image, format, flipY, mimeType = 'image/png' ) {
 
@@ -1413,7 +1418,7 @@ class GLTFWriter {
 	/**
 	 * Process sampler
 	 * @param  {Texture} map Texture to process
-	 * @return {Integer}     Index of the processed texture in the "samplers" array
+	 * @return {number}      Index of the processed texture in the "samplers" array
 	 */
 	processSampler( map ) {
 
@@ -1435,7 +1440,7 @@ class GLTFWriter {
 	/**
 	 * Process texture
 	 * @param  {Texture} map Map to process
-	 * @return {Integer} Index of the processed texture in the "textures" array
+	 * @return {Promise<number>} Index of the processed texture in the "textures" array
 	 */
 	async processTextureAsync( map ) {
 
@@ -1481,7 +1486,7 @@ class GLTFWriter {
 	/**
 	 * Process material
 	 * @param  {THREE.Material} material Material to process
-	 * @return {Integer|null} Index of the processed material in the "materials" array
+	 * @return {Promise<number|null>} Index of the processed material in the "materials" array
 	 */
 	async processMaterialAsync( material ) {
 
@@ -1657,7 +1662,7 @@ class GLTFWriter {
 	/**
 	 * Process mesh
 	 * @param  {THREE.Mesh} mesh Mesh to process
-	 * @return {Integer|null} Index of the processed mesh in the "meshes" array
+	 * @return {Promise<number|null>} Index of the processed mesh in the "meshes" array
 	 */
 	async processMeshAsync( mesh ) {
 
@@ -2062,7 +2067,7 @@ class GLTFWriter {
 	/**
 	 * Process camera
 	 * @param  {THREE.Camera} camera Camera to process
-	 * @return {Integer}      Index of the processed mesh in the "camera" array
+	 * @return {number} Index of the processed mesh in the "camera" array
 	 */
 	processCamera( camera ) {
 
@@ -2262,8 +2267,8 @@ class GLTFWriter {
 
 	/**
 	 * Process Object3D node
-	 * @param  {THREE.Object3D} node Object3D to processNodeAsync
-	 * @return {Integer} Index of the node in the nodes list
+	 * @param  {THREE.Object3D} object Object3D to processNodeAsync
+	 * @return {Promise<number>} Index of the node in the nodes list
 	 */
 	async processNodeAsync( object ) {
 
@@ -2370,7 +2375,7 @@ class GLTFWriter {
 
 	/**
 	 * Process Scene
-	 * @param  {Scene} node Scene to process
+	 * @param  {Scene} scene Scene to process
 	 */
 	async processSceneAsync( scene ) {
 
@@ -2414,7 +2419,7 @@ class GLTFWriter {
 
 	/**
 	 * Creates a Scene to hold a list of objects and parse it
-	 * @param  {Array} objects List of objects to process
+	 * @param  {Array<THREE.Object3D>} objects List of objects to process
 	 */
 	async processObjectsAsync( objects ) {
 
