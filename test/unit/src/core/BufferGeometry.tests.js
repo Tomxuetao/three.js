@@ -1,5 +1,3 @@
-/* global QUnit */
-
 import { BufferGeometry } from '../../../../src/core/BufferGeometry.js';
 
 import {
@@ -103,23 +101,6 @@ export default QUnit.module( 'Core', () => {
 		} );
 
 		// PROPERTIES
-		QUnit.todo( 'id', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'uuid', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'name', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
 
 		QUnit.test( 'type', ( assert ) => {
 
@@ -128,60 +109,6 @@ export default QUnit.module( 'Core', () => {
 				object.type === 'BufferGeometry',
 				'BufferGeometry.type should be BufferGeometry'
 			);
-
-		} );
-
-		QUnit.todo( 'index', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'attributes', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'morphAttributes', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'morphTargetsRelative', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'groups', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'boundingBox', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'boundingSphere', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'drawRange', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
-		QUnit.todo( 'userData', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
 
 		} );
 
@@ -213,12 +140,6 @@ export default QUnit.module( 'Core', () => {
 
 			a.setIndex( str );
 			assert.strictEqual( a.getIndex(), str, 'Weird index gets stored correctly' );
-
-		} );
-
-		QUnit.todo( 'getAttribute', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
 
 		} );
 
@@ -262,11 +183,6 @@ export default QUnit.module( 'Core', () => {
 
 			a.clearGroups();
 			assert.strictEqual( a.groups.length, 0, 'Check groups were deleted correctly' );
-
-		} );
-		QUnit.todo( 'clearGroups', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
 
 		} );
 
@@ -427,12 +343,6 @@ export default QUnit.module( 'Core', () => {
 
 		} );
 
-		QUnit.todo( 'setFromPoints', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
 		QUnit.test( 'computeBoundingBox', ( assert ) => {
 
 			let bb = getBBForVertices( [ - 1, - 2, - 3, 13, - 2, - 3.5, - 1, - 20, 0, - 4, 5, 6 ] );
@@ -516,37 +426,31 @@ export default QUnit.module( 'Core', () => {
 
 		} );
 
-		QUnit.todo( 'computeTangents', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
 		QUnit.test( 'computeVertexNormals', ( assert ) => {
 
 			// get normals for a counter clockwise created triangle
 			let normals = getNormalsForVertices( [ - 1, 0, 0, 1, 0, 0, 0, 1, 0 ], assert );
 
 			assert.ok( normals[ 0 ] === 0 && normals[ 1 ] === 0 && normals[ 2 ] === 1,
-				'first normal is pointing to screen since the the triangle was created counter clockwise' );
+				'first normal is pointing to screen since the triangle was created counter clockwise' );
 
 			assert.ok( normals[ 3 ] === 0 && normals[ 4 ] === 0 && normals[ 5 ] === 1,
-				'second normal is pointing to screen since the the triangle was created counter clockwise' );
+				'second normal is pointing to screen since the triangle was created counter clockwise' );
 
 			assert.ok( normals[ 6 ] === 0 && normals[ 7 ] === 0 && normals[ 8 ] === 1,
-				'third normal is pointing to screen since the the triangle was created counter clockwise' );
+				'third normal is pointing to screen since the triangle was created counter clockwise' );
 
 			// get normals for a clockwise created triangle
 			normals = getNormalsForVertices( [ 1, 0, 0, - 1, 0, 0, 0, 1, 0 ], assert );
 
 			assert.ok( normals[ 0 ] === 0 && normals[ 1 ] === 0 && normals[ 2 ] === - 1,
-				'first normal is pointing to screen since the the triangle was created clockwise' );
+				'first normal is pointing to screen since the triangle was created clockwise' );
 
 			assert.ok( normals[ 3 ] === 0 && normals[ 4 ] === 0 && normals[ 5 ] === - 1,
-				'second normal is pointing to screen since the the triangle was created clockwise' );
+				'second normal is pointing to screen since the triangle was created clockwise' );
 
 			assert.ok( normals[ 6 ] === 0 && normals[ 7 ] === 0 && normals[ 8 ] === - 1,
-				'third normal is pointing to screen since the the triangle was created clockwise' );
+				'third normal is pointing to screen since the triangle was created clockwise' );
 
 			normals = getNormalsForVertices( [ 0, 0, 1, 0, 0, - 1, 1, 1, 0 ], assert );
 
@@ -612,12 +516,6 @@ export default QUnit.module( 'Core', () => {
 
 		} );
 
-		QUnit.todo( 'normalizeNormals', ( assert ) => {
-
-			assert.ok( false, 'everything\'s gonna be alright' );
-
-		} );
-
 		QUnit.test( 'toNonIndexed', ( assert ) => {
 
 			const geometry = new BufferGeometry();
@@ -654,7 +552,7 @@ export default QUnit.module( 'Core', () => {
 			let j = a.toJSON();
 			const gold = {
 				'metadata': {
-					'version': 4.6,
+					'version': 4.7,
 					'type': 'BufferGeometry',
 					'generator': 'BufferGeometry.toJSON'
 				},

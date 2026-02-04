@@ -19,6 +19,20 @@ function getWireframeVersion( geometry ) {
 }
 
 /**
+ * Returns the wireframe ID for the given geometry.
+ *
+ * @private
+ * @function
+ * @param {BufferGeometry} geometry - The geometry.
+ * @return {number} The ID.
+ */
+function getWireframeId( geometry ) {
+
+	return ( geometry.index !== null ) ? geometry.index.id : geometry.attributes.position.id;
+
+}
+
+/**
  * Returns a wireframe index attribute for the given geometry.
  *
  * @private
@@ -65,6 +79,7 @@ function getWireframeIndex( geometry ) {
 
 	const attribute = new ( arrayNeedsUint32( indices ) ? Uint32BufferAttribute : Uint16BufferAttribute )( indices, 1 );
 	attribute.version = getWireframeVersion( geometry );
+	attribute.__id = getWireframeId( geometry );
 
 	return attribute;
 
@@ -116,6 +131,14 @@ class Geometries extends DataMap {
 		 * @type {WeakMap<BufferAttribute,number>}
 		 */
 		this.attributeCall = new WeakMap();
+
+		/**
+		 * Stores the event listeners attached to geometries.
+		 *
+		 * @private
+		 * @type {Map<BufferGeometry,Function>}
+		 */
+		this._geometryDisposeListeners = new Map();
 
 	}
 
@@ -189,9 +212,15 @@ class Geometries extends DataMap {
 
 			geometry.removeEventListener( 'dispose', onDispose );
 
+			this._geometryDisposeListeners.delete( geometry );
+
 		};
 
 		geometry.addEventListener( 'dispose', onDispose );
+
+		// see #31798 why tracking separate remove listeners is required right now
+		// TODO: Re-evaluate how onDispose() is managed in this component
+		this._geometryDisposeListeners.set( geometry, onDispose );
 
 	}
 
@@ -297,6 +326,18 @@ class Geometries extends DataMap {
 	}
 
 	/**
+	 * Returns the byte offset into the indirect attribute buffer of the given render object.
+	 *
+	 * @param {RenderObject} renderObject - The render object.
+	 * @return {number} The byte offset into the indirect attribute buffer.
+	 */
+	getIndirectOffset( renderObject ) {
+
+		return renderObject.geometry.indirectOffset;
+
+	}
+
+	/**
 	 * Returns the index of the given render object's geometry. This is implemented
 	 * in a method to return a wireframe index if necessary.
 	 *
@@ -321,7 +362,7 @@ class Geometries extends DataMap {
 
 				wireframes.set( geometry, wireframeAttribute );
 
-			} else if ( wireframeAttribute.version !== getWireframeVersion( geometry ) ) {
+			} else if ( wireframeAttribute.version !== getWireframeVersion( geometry ) || wireframeAttribute.__id !== getWireframeId( geometry ) ) {
 
 				this.attributes.delete( wireframeAttribute );
 
@@ -336,6 +377,18 @@ class Geometries extends DataMap {
 		}
 
 		return index;
+
+	}
+
+	dispose() {
+
+		for ( const [ geometry, onDispose ] of this._geometryDisposeListeners.entries() ) {
+
+			geometry.removeEventListener( 'dispose', onDispose );
+
+		}
+
+		this._geometryDisposeListeners.clear();
 
 	}
 

@@ -215,6 +215,7 @@ import './src/math/interpolants/QuaternionLinearInterpolant.tests.js';
 
 //src/objects
 import './src/objects/Bone.tests.js';
+import './src/objects/BatchedMesh.tests.js';
 import './src/objects/Group.tests.js';
 import './src/objects/InstancedMesh.tests.js';
 import './src/objects/Line.tests.js';
@@ -263,6 +264,12 @@ import './src/renderers/webgl/WebGLState.tests.js';
 import './src/renderers/webgl/WebGLTextures.tests.js';
 import './src/renderers/webgl/WebGLUniforms.tests.js';
 import './src/renderers/webgl/WebGLUtils.tests.js';
+
+//src/renderers/webgpu/nodes
+import './src/renderers/webgpu/nodes/WGSLNodeBuilder.tests.js';
+
+//src/nodes/accessors
+import './src/nodes/accessors/StorageTextureNode.tests.js';
 
 
 //src/scenes

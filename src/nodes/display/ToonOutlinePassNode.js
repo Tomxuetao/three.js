@@ -14,7 +14,7 @@ import PassNode from './PassNode.js';
  * will receive the outline.
  *
  * ```js
- * const postProcessing = new PostProcessing( renderer );
+ * const postProcessing = new RenderPipeline( renderer );
  *
  * const scenePass = toonOutlinePass( scene, camera );
  *
@@ -71,6 +71,14 @@ class ToonOutlinePassNode extends PassNode {
 		 * @type {WeakMap<Material, NodeMaterial>}
 		 */
 		this._materialCache = new WeakMap();
+
+		/**
+		 * The name of this pass.
+		 *
+		 * @type {string}
+		 * @default 'Outline Pass'
+		 */
+		this.name = 'Outline Pass';
 
 	}
 

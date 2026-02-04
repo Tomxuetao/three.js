@@ -1,8 +1,8 @@
-( function () { // eslint-disable-line strict
+( function () {
 
-	'use strict'; // eslint-disable-line strict
+	'use strict';
 
-	/* global monaco, require, lessonEditorSettings */
+	/* global monaco, lessonEditorSettings */
 
 	const {
 		fixSourceLinks,
@@ -1961,7 +1961,7 @@ async function openInStackBlitz() {
 		} else {
 
 			applySubstitutions();
-			require.config( { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs' } } );
+			require.config( { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } } );
 			require( [ 'vs/editor/editor.main' ], main );
 
 		}
